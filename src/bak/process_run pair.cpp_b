@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <math.h>
+
+
+#define DEFAULT_SOCKET_BUFFER_SIZE (4*1024)
+
+int gServer;
+int gClient;
+int client_run(int fd_remote);
+static int init()
+{
+    int sockets[2];
+    if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sockets) == 0) {
+        size_t size = DEFAULT_SOCKET_BUFFER_SIZE;
+        setsockopt(sockets[0], SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+        setsockopt(sockets[1], SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+        setsockopt(sockets[0], SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+        setsockopt(sockets[1], SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+        fcntl(sockets[0], F_SETFL, O_NONBLOCK);
+        fcntl(sockets[1], F_SETFL, O_NONBLOCK);
+        gServer = sockets[0];
+        gClient = sockets[1];
+    } else {
+        gServer = -errno;
+        return -errno;
+    }
+    return 0;
+}
+
+ssize_t write(int fd, void const* vaddr, size_t size)
+{
+    ssize_t err, len;
+    do {
+        len = send(fd, vaddr, size, MSG_DONTWAIT | MSG_NOSIGNAL);
+        // cannot return less than size, since we're using SOCK_SEQPACKET
+        err = len < 0 ? errno : 0;
+    } while (err == EINTR);
+    return err == 0 ? len : -err;
+}
+
+ssize_t read_s(int fd, void* vaddr, size_t size)
+{
+    ssize_t err, len;
+    do {
+        len = recv(fd, vaddr, size, MSG_WAITALL);
+        err = len < 0 ? errno : 0;
+    } while (err == EINTR);
+    if (err == EAGAIN || err == EWOULDBLOCK) {
+        // EAGAIN means that we have non-blocking I/O but there was
+        // no data to be read. Nothing the client should care about.
+        return 0;
+    }
+    return err == 0 ? len : -err;
+}
+void * process_run(void * p )
+{
+    struct timeval tv;
+    char tmp[512];
+    // init socket
+    while (init() < 0)
+    {
+        sleep(5);
+        printf("init() retry...");
+    }
+    int fd_dup = dup(gClient);
+    printf("init() success gServer=%d gClient=%d client_dup()=%d\n", gServer,gClient,fd_dup);
+    //close(gClient);
+
+    // pid_t fpid; //fpid表示fork函数返回的值
+    // fpid = fork();
+    // if (fpid < 0)
+    // {
+    //     printf("error in fork!");
+    //     return NULL;
+    // }
+    // else if (fpid == 0) {
+    //     printf("client_run() para:%d fd_dup:%d\n",gClient,fd_dup);
+    //     client_run(gClient);
+    // }
+
+    while(1)
+    {
+        // send socket
+        sleep(5);
+        memset(tmp,0,sizeof(tmp));
+        gettimeofday(&tv, NULL);
+        struct tm *ptm = gmtime(&tv.tv_sec);
+        size_t l = strftime(tmp,sizeof(tmp),"%F %T",ptm);
+        snprintf(tmp+l,sizeof(tmp) - l,".%06ld", tv.tv_usec);
+        write(gServer,tmp,strlen(tmp));
+        printf("send -> %s\n",tmp);
+    }
+
+    close(gServer);
+
+    return NULL;
+}
+

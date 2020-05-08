@@ -1,0 +1,10 @@
+Package: file_sock
+Version: 1.0
+Description: test test.
+Section: extras
+Priority: optional
+Maintainer: jinyutao <jinyutao@sis.sh.cn>
+License: CLOSED
+Architecture: all
+Depends: test ipk
+Source: N/A
