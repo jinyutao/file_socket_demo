@@ -1,6 +1,5 @@
 # file_socket_demo
-
- cd demo_app
- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/../lib/lib/ 
- ./file_sock -s & 
- ./file_sock -c
+>cd demo_app <br/>
+>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\`pwd\`\/..\/lib\/lib\/ <br/>
+>./file_sock -s \& <br/>
+>./file_sock -c <br/>
