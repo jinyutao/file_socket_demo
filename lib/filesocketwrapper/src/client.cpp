@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <cstddef>
 
 #include "fs_constants.h"
 
@@ -41,10 +42,12 @@ int tcu_sf_connect(const char* sock_file_name, notify_cb fun)
     }
     struct sockaddr_un server_address;
     server_address.sun_family = AF_UNIX;
-    strcpy(server_address.sun_path, sock_file_name);
+    server_address.sun_path[0]='\0';
+    strcpy(server_address.sun_path + 1, sock_file_name);
 
     int server_sockfd=socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if(connect(server_sockfd,(struct sockaddr *)&server_address,sizeof(server_address)) < 0){
+    if(connect(server_sockfd,(struct sockaddr *)&server_address,
+        offsetof(struct sockaddr_un, sun_path) + strlen(sock_file_name) + 1) < 0){
         printf("connect socket failed errno=%d [%s]\n", errno, strerror(errno));
         return -errno;
     }

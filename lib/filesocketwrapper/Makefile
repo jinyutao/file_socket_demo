@@ -20,7 +20,7 @@ override CXXFLAGS += \
 	-I../include \
 	-I./include \
 	-D_REENTRANT -std=c++1y -Wall -fPIC
-override LDFLAGS += -lpthread -lstdc++ -lglib-2.0 -lrt -ldl
+override LDFLAGS += -lpthread -lstdc++ -lrt -ldl
 
 LIBNAME=libfilesocketwrapper
 SONAMEVERSION=0

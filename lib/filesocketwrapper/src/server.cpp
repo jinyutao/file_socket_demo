@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <cstddef>
 
 #include "com_func.h"
 
@@ -36,13 +37,15 @@ int tcu_sf_listen(const char* sock_file_name, int max_listen, notify_cb fun)
         return -1;
     struct sockaddr_un server_address;
     server_address.sun_family = AF_UNIX;
-    strcpy(server_address.sun_path, sock_file_name);
+    server_address.sun_path[0] = '\0';
+    strcpy(server_address.sun_path + 1, sock_file_name);
     server_sockfd=socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (DEBUG) printf("server_sockfd=%d\n",server_sockfd);
     do
     {
         errno =0;
-        ret = bind(server_sockfd, (struct sockaddr*)&server_address, sizeof(server_address));
+        ret = bind(server_sockfd, (struct sockaddr*)&server_address, 
+            offsetof(struct sockaddr_un, sun_path) + strlen(sock_file_name) + 1);
         ret = ret==0?0:-errno;
         if (DEBUG) printf("bind()=%d errno=%d[%s]\n",ret,errno, strerror(errno));
         if(ret && ret==(-EADDRINUSE))
