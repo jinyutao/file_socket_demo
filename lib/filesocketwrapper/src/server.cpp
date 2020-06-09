@@ -155,7 +155,7 @@ static void* _run_svr_accept_fun(void * p)
         FD_ZERO(&sockfd_set);
         FD_SET(new_fd, &sockfd_set);
         timeout_val.tv_sec = 0;
-        timeout_val.tv_usec = 50*1000*1000;
+        timeout_val.tv_usec = 50*1000;
         int retval = select(new_fd + 1, &sockfd_set, NULL, NULL, &timeout_val);
         if(retval<=0 || !FD_ISSET(new_fd, &sockfd_set))
         {
