@@ -19,8 +19,8 @@ override CXXFLAGS += \
 	-I. \
 	-I../include \
 	-I./include \
-	-D_REENTRANT -std=c++1y -Wall -fPIC
-override LDFLAGS += -lpthread -lstdc++ -lrt -ldl
+	-D_REENTRANT -std=c++1y -Wall -fPIC -ggdb3
+override LDFLAGS += -lpthread -lstdc++ -lrt -ldl -ggdb3
 
 LIBNAME=libfilesocketwrapper
 SONAMEVERSION=0

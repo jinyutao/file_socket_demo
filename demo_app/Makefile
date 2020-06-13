@@ -8,7 +8,7 @@ lib_path=../lib
 
 override CFLAGS += -I$(SDKTARGETSYSROOT)/usr/include \
     -I. -I.. -I$(lib_path)/filesocketwrapper/include -I$(lib_path)/include/ 
-override LNK_FLAGS += -lpthread -lstdc++ -L$(lib_path)/lib -lfilesocketwrapper
+override LNK_FLAGS += -lpthread -lstdc++ -L$(lib_path)/lib -lfilesocketwrapper -ggdb3
 
 #注意每行后面不要有空格，否则会算到目录名里面，导致问题
 SRC_DIR = src
