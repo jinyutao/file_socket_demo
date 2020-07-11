@@ -49,6 +49,7 @@ int tcu_sf_connect(const char* sock_file_name, notify_cb fun)
     if(connect(server_sockfd,(struct sockaddr *)&server_address,
         offsetof(struct sockaddr_un, sun_path) + strlen(sock_file_name) + 1) < 0){
         printf("connect socket failed errno=%d [%s]\n", errno, strerror(errno));
+        close(server_sockfd);
         return -errno;
     }
     if (DEBUG) printf("%s send hell message\n",__FUNCTION__);
